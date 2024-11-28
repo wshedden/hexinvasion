@@ -88,22 +88,13 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         ctx.fill();
         ctx.stroke();
 
-        // Draw population dots
-        if (cell.population > 0) {
-            const dotRadius = 3;
-            const dotSpacing = 2 * dotRadius + 2;
-            const maxDotsPerRow = Math.floor(size / dotSpacing);
-            const totalDots = Math.min(cell.population, maxDotsPerRow * maxDotsPerRow);
-            for (let i = 0; i < totalDots; i++) {
-                const row = Math.floor(i / maxDotsPerRow);
-                const col = i % maxDotsPerRow;
-                const dotX = x - (maxDotsPerRow - 1) * dotSpacing / 2 + col * dotSpacing;
-                const dotY = y - (maxDotsPerRow - 1) * dotSpacing / 2 + row * dotSpacing;
-                ctx.beginPath();
-                ctx.arc(dotX, dotY, dotRadius, 0, 2 * Math.PI);
-                ctx.fillStyle = '#000';
-                ctx.fill();
-            }
+        // Draw number of soldiers
+        if (cell.soldiers > 0) {
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(cell.soldiers, x, y);
         }
     }
 
@@ -114,7 +105,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         factions.forEach(faction => {
             const factionCells = grid.filter(cell => cell.faction === faction);
             const totalPopulation = factionCells.reduce((sum, cell) => sum + cell.population, 0);
-            const totalSoldiers = Math.floor(totalPopulation / 100);
+            const totalSoldiers = factionCells.reduce((sum, cell) => sum + cell.soldiers, 0);
             infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3>`;
             infoHTML += `<p>Cells Claimed: ${factionCells.length}</p>`;
             infoHTML += `<p>Total Population: ${totalPopulation}</p>`;
@@ -134,6 +125,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
             <p><strong>Fertility:</strong> ${cell.fertility}</p>
             <p><strong>Population:</strong> ${cell.population}</p>
+            <p><strong>Soldiers:</strong> ${cell.soldiers}</p>
         `;
         infoPanel.style.display = 'block';
     }
@@ -218,6 +210,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         grid.forEach(cell => {
             if (cell.faction) {
                 cell.population += 1;
+                cell.soldiers = Math.floor(cell.population / 10); // Update soldiers based on population
             }
         });
 
