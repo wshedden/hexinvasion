@@ -1,5 +1,5 @@
-import { decideBestMove } from './decisionLogic.js';
-import { drawGrid } from './utils.js';
+import { decideBestMove } from '../utils/decisionLogic';
+import { drawGrid } from './utils';
 
 export function gameLoop(grid, factions) {
     factions.forEach(faction => {
