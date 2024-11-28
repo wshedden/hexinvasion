@@ -2,6 +2,7 @@
     const GRID_SIZE = 5; // Hardcoded for prototype
     const factions = ['red', 'blue'];
     let activeFaction = factions[0];
+    let activeOwner = 'Player1'; // Example owner
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -16,7 +17,7 @@
     for (let q = -GRID_SIZE; q <= GRID_SIZE; q++) {
         for (let r = -GRID_SIZE; r <= GRID_SIZE; r++) {
             if (Math.abs(q + r) <= GRID_SIZE) {
-                grid.push({ q, r, faction: null });
+                grid.push({ q, r, faction: null, owner: null });
             }
         }
     }
@@ -70,7 +71,9 @@
 
         if (clickedCell && !clickedCell.faction) {
             clickedCell.faction = activeFaction;
+            clickedCell.owner = activeOwner;
             drawGrid();
+            showInfoPanel(clickedCell);
         }
     });
 
@@ -81,6 +84,18 @@
             console.log(`Active faction: ${activeFaction}`);
         }
     });
+
+    // Show info panel
+    function showInfoPanel(cell) {
+        const infoPanel = document.getElementById('info-panel');
+        infoPanel.innerHTML = `
+            <h2>Cell Information</h2>
+            <p><strong>Coordinates:</strong> (${cell.q}, ${cell.r})</p>
+            <p><strong>Faction:</strong> ${cell.faction || 'Unclaimed'}</p>
+            <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
+        `;
+        infoPanel.style.display = 'block';
+    }
 
     drawGrid();
 })();
