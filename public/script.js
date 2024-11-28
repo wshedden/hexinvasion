@@ -23,8 +23,10 @@
 
     // Convert axial coordinates to pixel
     function hexToPixel(q, r) {
-        const x = hexSize * Math.sqrt(3) * (q + r / 2);
-        const y = hexSize * 1.5 * r;
+        const dx = hexSize * 1.5;
+        const dy = hexSize * Math.sqrt(3);
+        const x = q * dx;
+        const y = r * dy + (q % 2) * (dy / 2);
         return { x: x + canvas.width / 2, y: y + canvas.height / 2 };
     }
 
