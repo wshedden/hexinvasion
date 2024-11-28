@@ -22,6 +22,12 @@
         }
     }
 
+    // Initial setup: claim specific cells for blue and red factions
+    function initialSetup() {
+        claimCell(grid, 0, 0, 'blue', 'PlayerBlue'); // Blue faction starts with cell (0, 0)
+        claimCell(grid, 1, -1, 'red', 'PlayerRed'); // Red faction starts with cell (1, -1)
+    }
+
     // Convert axial coordinates to pixel
     function hexToPixel(q, r) {
         const dx = hexSize * 1.5;
@@ -69,10 +75,7 @@
             return Math.hypot(x - cellX, y - cellY) < hexSize;
         });
 
-        if (clickedCell && !clickedCell.faction) {
-            clickedCell.faction = activeFaction;
-            clickedCell.owner = activeOwner;
-            drawGrid();
+        if (clickedCell) {
             showInfoPanel(clickedCell);
         }
     });
@@ -97,5 +100,17 @@
         infoPanel.style.display = 'block';
     }
 
+    // Claim a cell for a faction and owner
+    function claimCell(grid, q, r, faction, owner) {
+        const cell = grid.find(cell => cell.q === q && cell.r === r);
+        if (cell && !cell.faction) {
+            cell.faction = faction; // Claim the cell for the faction
+            cell.owner = owner; // Set the owner of the cell
+            return true;
+        }
+        return false; // Cell already claimed or invalid
+    }
+
+    initialSetup();
     drawGrid();
 })();
