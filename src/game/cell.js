@@ -1,7 +1,7 @@
 // src/game/cell.js
 
 export default class Cell {
-    constructor(q, r, faction = null, owner = null, fertility = Math.floor(Math.random() * 11), population = 0, soldiers = 0) {
+    constructor(q, r, faction = null, owner = null, fertility = Math.floor(Math.random() * 11), population = 0, soldiers = 0, wealth = 100) {
         this.q = q;
         this.r = r;
         this.faction = faction;
@@ -9,6 +9,8 @@ export default class Cell {
         this.fertility = fertility;
         this.population = population;
         this.soldiers = soldiers;
+        this.wealth = wealth;
+        this.threatened = 0; // Initialize threatened value
     }
 
     claim(faction, owner) {
@@ -35,5 +37,14 @@ export default class Cell {
             blue: '#00008B'
         };
         return this.faction ? colorMap[this.faction] || '#CCCCCC' : '#FFFFFF';
+    }
+
+    calculateThreatened(neighbors) {
+        this.threatened = neighbors.reduce((sum, neighbor) => {
+            if (neighbor.faction && neighbor.faction !== this.faction) {
+                return sum + neighbor.soldiers;
+            }
+            return sum;
+        }, 0);
     }
 }

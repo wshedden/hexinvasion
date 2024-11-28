@@ -126,6 +126,8 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             <p><strong>Fertility:</strong> ${cell.fertility}</p>
             <p><strong>Population:</strong> ${cell.population}</p>
             <p><strong>Soldiers:</strong> ${cell.soldiers}</p>
+            <p><strong>Wealth:</strong> ${cell.wealth}</p>
+            <p><strong>Threatened:</strong> ${cell.threatened}</p>
         `;
         infoPanel.style.display = 'block';
     }
@@ -176,6 +178,22 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         }
     }
 
+    // Move soldiers to contested tiles
+    function moveSoldiersToContestedTiles(faction) {
+        const factionCells = grid.filter(cell => cell.faction === faction);
+        factionCells.forEach(cell => {
+            const neighbors = getNeighbors(cell.q, cell.r);
+            const contestedNeighbors = neighbors.filter(neighbor => neighbor.faction && neighbor.faction !== faction);
+            if (contestedNeighbors.length > 0) {
+                const targetCell = contestedNeighbors[0]; // Move soldiers to the first contested neighbor
+                if (cell.soldiers > 0) {
+                    targetCell.soldiers += cell.soldiers;
+                    cell.soldiers = 0;
+                }
+            }
+        });
+    }
+
     // Handle clicks
     canvas.addEventListener('click', e => {
         const x = e.offsetX;
@@ -204,6 +222,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     function gameLoop() {
         factions.forEach(faction => {
             decideBestMove(faction);
+            moveSoldiersToContestedTiles(faction);
         });
 
         // Increase population of occupied cells
@@ -211,6 +230,8 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             if (cell.faction) {
                 cell.population += 1;
                 cell.soldiers = Math.floor(cell.population / 10); // Update soldiers based on population
+                const neighbors = getNeighbors(cell.q, cell.r);
+                cell.calculateThreatened(neighbors); // Calculate threatened value based on neighbors
             }
         });
 

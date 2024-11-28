@@ -4,21 +4,17 @@ import { drawGrid } from './utils';
 export function gameLoop(grid, factions) {
     factions.forEach(faction => {
         decideBestMove(grid, faction);
+        moveSoldiersToContestedTiles(faction);
     });
 
-    // Decrease wealth based on population and handle cell loss
+    // Increase population of occupied cells
     grid.forEach(cell => {
         if (cell.faction) {
-            cell.wealth -= cell.population;
-            if (cell.wealth <= 0) {
-                cell.faction = null;
-                cell.owner = null;
-                cell.population = 0;
-                cell.wealth = 100; // Reset wealth for unclaimed cell
-            } else {
-                cell.population += 1;
-            }
+            cell.population += 1;
+            cell.soldiers = Math.floor(cell.population / 10); // Update soldiers based on population
         }
+        const neighbors = getNeighbors(cell.q, cell.r);
+        cell.calculateThreatened(neighbors); // Calculate threatened value based on neighbors
     });
 
     drawGrid(grid);
@@ -35,8 +31,9 @@ export function showCellInfoPanel(cell) {
         <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
         <p><strong>Fertility:</strong> ${cell.fertility}</p>
         <p><strong>Population:</strong> ${cell.population}</p>
+        <p><strong>Soldiers:</strong> ${cell.soldiers}</p>
         <p><strong>Wealth:</strong> ${cell.wealth}</p>
-        <p><strong>Soldiers:</strong> ${Math.floor(cell.population / 10)}</p>
+        <p><strong>Threatened:</strong> ${cell.threatened}</p>
     `;
     infoPanel.style.display = 'block';
 }
