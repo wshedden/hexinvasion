@@ -21,10 +21,9 @@ canvas {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#info-panel {
+#cell-info-panel, #faction-info-panel {
     position: fixed;
     top: 10px;
-    right: 10px;
     width: 200px;
     padding: 10px;
     background-color: #f9f9f9;
@@ -34,11 +33,19 @@ canvas {
     display: none;
 }
 
-#info-panel h2 {
+#cell-info-panel {
+    left: 10px;
+}
+
+#faction-info-panel {
+    right: 10px;
+}
+
+#cell-info-panel h2, #faction-info-panel h2 {
     margin-top: 0;
     font-size: 1.2em;
 }
 
-#info-panel p {
+#cell-info-panel p, #faction-info-panel p {
     margin: 5px 0;
 }

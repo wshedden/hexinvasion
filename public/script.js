@@ -19,7 +19,7 @@
     for (let q = -GRID_SIZE; q <= GRID_SIZE; q++) {
         for (let r = -GRID_SIZE; r <= GRID_SIZE; r++) {
             if (Math.abs(q + r) <= GRID_SIZE) {
-                grid.push({ q, r, faction: null, owner: null });
+                grid.push({ q, r, faction: null, owner: null, fertility: Math.floor(Math.random() * 11) });
             }
         }
     }
@@ -66,19 +66,29 @@
         ctx.stroke();
     }
 
-    // Show info panel
-    function showInfoPanel() {
-        const infoPanel = document.getElementById('info-panel');
+    // Show faction info panel
+    function showFactionInfoPanel() {
+        const infoPanel = document.getElementById('faction-info-panel');
         let infoHTML = '<h2>Faction Information</h2>';
         factions.forEach(faction => {
-            infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3><ul>`;
             const factionCells = grid.filter(cell => cell.faction === faction);
-            factionCells.forEach(cell => {
-                infoHTML += `<li>Cell (${cell.q}, ${cell.r}) - Owner: ${cell.owner}</li>`;
-            });
-            infoHTML += '</ul>';
+            infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3>`;
+            infoHTML += `<p>Cells Claimed: ${factionCells.length}</p>`;
         });
         infoPanel.innerHTML = infoHTML;
+        infoPanel.style.display = 'block';
+    }
+
+    // Show cell info panel
+    function showCellInfoPanel(cell) {
+        const infoPanel = document.getElementById('cell-info-panel');
+        infoPanel.innerHTML = `
+            <h2>Cell Information</h2>
+            <p><strong>Coordinates:</strong> (${cell.q}, ${cell.r})</p>
+            <p><strong>Faction:</strong> ${cell.faction || 'Unclaimed'}</p>
+            <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
+            <p><strong>Fertility:</strong> ${cell.fertility}</p>
+        `;
         infoPanel.style.display = 'block';
     }
 
@@ -88,7 +98,7 @@
         if (cell && !cell.faction) {
             cell.faction = faction; // Claim the cell for the faction
             cell.owner = owner; // Set the owner of the cell
-            showInfoPanel(); // Update the info panel
+            showFactionInfoPanel(); // Update the faction info panel
             return true;
         }
         return false; // Cell already claimed or invalid
@@ -131,7 +141,7 @@
         });
 
         if (clickedCell) {
-            showInfoPanel(clickedCell);
+            showCellInfoPanel(clickedCell);
         }
     });
 
@@ -158,7 +168,7 @@
 
     initialSetup();
     drawGrid();
-    showInfoPanel(); // Initial call to show info panel
+    showFactionInfoPanel(); // Initial call to show faction info panel
 
     // Start the game loop
     setInterval(gameLoop, 1000);
