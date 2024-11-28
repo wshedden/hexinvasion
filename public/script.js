@@ -19,7 +19,7 @@
     for (let q = -GRID_SIZE; q <= GRID_SIZE; q++) {
         for (let r = -GRID_SIZE; r <= GRID_SIZE; r++) {
             if (Math.abs(q + r) <= GRID_SIZE) {
-                grid.push({ q, r, faction: null, owner: null, fertility: Math.floor(Math.random() * 11) });
+                grid.push({ q, r, faction: null, owner: null, fertility: Math.floor(Math.random() * 11), population: 0 });
             }
         }
     }
@@ -44,12 +44,12 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         grid.forEach(cell => {
             const { x, y } = hexToPixel(cell.q, cell.r);
-            drawHex(x, y, hexSize, cell.faction);
+            drawHex(x, y, hexSize, cell);
         });
     }
 
     // Draw a single hex
-    function drawHex(x, y, size, faction) {
+    function drawHex(x, y, size, cell) {
         const angle = (Math.PI / 180) * 60;
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
@@ -59,11 +59,29 @@
             else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        ctx.fillStyle = faction ? factions.includes(faction) ? faction : '#CCC' : '#FFF';
-        ctx.strokeStyle = faction ? '#000' : '#AAA'; // Outline color based on faction
-        ctx.lineWidth = faction ? 2 : 1; // Thicker outline for claimed cells
+        ctx.fillStyle = cell.faction ? factions.includes(cell.faction) ? cell.faction : '#CCC' : '#FFF';
+        ctx.strokeStyle = cell.faction ? '#000' : '#AAA'; // Outline color based on faction
+        ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
         ctx.stroke();
+
+        // Draw population dots
+        if (cell.population > 0) {
+            const dotRadius = 3;
+            const dotSpacing = 2 * dotRadius + 2;
+            const maxDotsPerRow = Math.floor(size / dotSpacing);
+            const totalDots = Math.min(cell.population, maxDotsPerRow * maxDotsPerRow);
+            for (let i = 0; i < totalDots; i++) {
+                const row = Math.floor(i / maxDotsPerRow);
+                const col = i % maxDotsPerRow;
+                const dotX = x - (maxDotsPerRow - 1) * dotSpacing / 2 + col * dotSpacing;
+                const dotY = y - (maxDotsPerRow - 1) * dotSpacing / 2 + row * dotSpacing;
+                ctx.beginPath();
+                ctx.arc(dotX, dotY, dotRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#000';
+                ctx.fill();
+            }
+        }
     }
 
     // Show faction info panel
@@ -72,8 +90,10 @@
         let infoHTML = '<h2>Faction Information</h2>';
         factions.forEach(faction => {
             const factionCells = grid.filter(cell => cell.faction === faction);
+            const totalFertility = factionCells.reduce((sum, cell) => sum + cell.fertility, 0);
             infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3>`;
             infoHTML += `<p>Cells Claimed: ${factionCells.length}</p>`;
+            infoHTML += `<p>Total Fertility: ${totalFertility}</p>`;
         });
         infoPanel.innerHTML = infoHTML;
         infoPanel.style.display = 'block';
@@ -88,6 +108,7 @@
             <p><strong>Faction:</strong> ${cell.faction || 'Unclaimed'}</p>
             <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
             <p><strong>Fertility:</strong> ${cell.fertility}</p>
+            <p><strong>Population:</strong> ${cell.population}</p>
         `;
         infoPanel.style.display = 'block';
     }
@@ -98,6 +119,7 @@
         if (cell && !cell.faction) {
             cell.faction = faction; // Claim the cell for the faction
             cell.owner = owner; // Set the owner of the cell
+            cell.population = 1; // Initialize population
             showFactionInfoPanel(); // Update the faction info panel
             return true;
         }
@@ -168,6 +190,14 @@
         factions.forEach(faction => {
             decideBestMove(faction);
         });
+
+        // Increase population of occupied cells
+        grid.forEach(cell => {
+            if (cell.faction) {
+                cell.population += 1;
+            }
+        });
+
         drawGrid();
     }
 
