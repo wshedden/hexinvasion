@@ -6,7 +6,7 @@ function createHexGrid(size, shapeFn) {
     for (let q = -size; q <= size; q++) {
         for (let r = -size; r <= size; r++) {
             if (shapeFn(q, r, size)) {
-                grid.push({ q, r, faction: null, owner: null }); // Add owner property
+                grid.push({ q, r, faction: null, owner: null, fertility: Math.floor(Math.random() * 11), population: 0, wealth: 100 });
             }
         }
     }
