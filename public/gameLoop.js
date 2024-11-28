@@ -36,6 +36,7 @@ export function showCellInfoPanel(cell) {
         <p><strong>Fertility:</strong> ${cell.fertility}</p>
         <p><strong>Population:</strong> ${cell.population}</p>
         <p><strong>Wealth:</strong> ${cell.wealth}</p>
+        <p><strong>Soldiers:</strong> ${Math.floor(cell.population / 10)}</p>
     `;
     infoPanel.style.display = 'block';
 }

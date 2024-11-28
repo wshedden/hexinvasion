@@ -111,10 +111,12 @@
         let infoHTML = '<h2>Faction Information</h2>';
         factions.forEach(faction => {
             const factionCells = grid.filter(cell => cell.faction === faction);
-            const totalFertility = factionCells.reduce((sum, cell) => sum + cell.fertility, 0);
+            const totalPopulation = factionCells.reduce((sum, cell) => sum + cell.population, 0);
+            const totalSoldiers = Math.floor(totalPopulation / 100);
             infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3>`;
             infoHTML += `<p>Cells Claimed: ${factionCells.length}</p>`;
-            infoHTML += `<p>Total Fertility: ${totalFertility}</p>`;
+            infoHTML += `<p>Total Population: ${totalPopulation}</p>`;
+            infoHTML += `<p>Total Soldiers: ${totalSoldiers}</p>`;
         });
         infoPanel.innerHTML = infoHTML;
         infoPanel.style.display = 'block';
