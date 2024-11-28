@@ -26,17 +26,16 @@
 
     // Initial setup: claim specific cells for blue and red factions
     async function initialSetup() {
+        try {
+            const response = await fetch('/api/grid');
+            const gridData = await response.json();
+            console.log('Grid Data:', gridData);
+        } catch (error) {
+            console.error('Error fetching grid:', error);
+        }
+
         claimCell(grid, 0, 0, 'blue', 'PlayerBlue'); // Blue faction starts with cell (0, 0)
         claimCell(grid, 1, -1, 'red', 'PlayerRed'); // Red faction starts with cell (1, -1)
-
-        // Example API request
-        try {
-            const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
-            const data = await response.json();
-            console.log('API Response:', data);
-        } catch (error) {
-            console.error('Error fetching API:', error);
-        }
     }
 
     // Convert axial coordinates to pixel
