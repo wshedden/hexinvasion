@@ -52,8 +52,8 @@
         }
         ctx.closePath();
         ctx.fillStyle = faction ? factions.includes(faction) ? faction : '#CCC' : '#FFF';
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = faction ? '#000' : '#AAA'; // Outline color based on faction
+        ctx.lineWidth = faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
         ctx.stroke();
     }
