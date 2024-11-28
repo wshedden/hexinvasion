@@ -48,6 +48,19 @@
         });
     }
 
+    // Get border color based on neighboring factions
+    function getBorderColor(cell) {
+        const neighbors = getNeighbors(cell.q, cell.r);
+        const neighborFactions = new Set(neighbors.map(neighbor => neighbor.faction).filter(faction => faction));
+        if (neighborFactions.size === 1) {
+            return Array.from(neighborFactions)[0];
+        } else if (neighborFactions.size > 1) {
+            // Mix colors if bordered by multiple factions
+            return 'purple'; // Example mixed color
+        }
+        return '#AAA'; // Default border color
+    }
+
     // Draw a single hex
     function drawHex(x, y, size, cell) {
         const angle = (Math.PI / 180) * 60;
@@ -60,7 +73,7 @@
         }
         ctx.closePath();
         ctx.fillStyle = cell.faction ? factions.includes(cell.faction) ? cell.faction : '#CCC' : '#FFF';
-        ctx.strokeStyle = cell.faction ? '#000' : '#AAA'; // Outline color based on faction
+        ctx.strokeStyle = cell.faction ? '#000' : getBorderColor(cell); // Outline color based on faction or border
         ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
         ctx.stroke();
