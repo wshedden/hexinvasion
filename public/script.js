@@ -1,4 +1,6 @@
 (async function () {
+    console.log('HexInvasion frontend loaded');
+
     const GRID_SIZE = 5; // Hardcoded for prototype
     const factions = ['red', 'blue'];
     let activeFaction = factions[0];
@@ -64,6 +66,29 @@
         ctx.stroke();
     }
 
+    // Show info panel
+    function showInfoPanel(cell) {
+        const infoPanel = document.getElementById('info-panel');
+        infoPanel.innerHTML = `
+            <h2>Cell Information</h2>
+            <p><strong>Coordinates:</strong> (${cell.q}, ${cell.r})</p>
+            <p><strong>Faction:</strong> ${cell.faction || 'Unclaimed'}</p>
+            <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
+        `;
+        infoPanel.style.display = 'block';
+    }
+
+    // Claim a cell for a faction and owner
+    function claimCell(grid, q, r, faction, owner) {
+        const cell = grid.find(cell => cell.q === q && cell.r === r);
+        if (cell && !cell.faction) {
+            cell.faction = faction; // Claim the cell for the faction
+            cell.owner = owner; // Set the owner of the cell
+            return true;
+        }
+        return false; // Cell already claimed or invalid
+    }
+
     // Handle clicks
     canvas.addEventListener('click', e => {
         const x = e.offsetX;
@@ -88,29 +113,22 @@
         }
     });
 
-    // Show info panel
-    function showInfoPanel(cell) {
-        const infoPanel = document.getElementById('info-panel');
-        infoPanel.innerHTML = `
-            <h2>Cell Information</h2>
-            <p><strong>Coordinates:</strong> (${cell.q}, ${cell.r})</p>
-            <p><strong>Faction:</strong> ${cell.faction || 'Unclaimed'}</p>
-            <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
-        `;
-        infoPanel.style.display = 'block';
-    }
-
-    // Claim a cell for a faction and owner
-    function claimCell(grid, q, r, faction, owner) {
-        const cell = grid.find(cell => cell.q === q && cell.r === r);
-        if (cell && !cell.faction) {
-            cell.faction = faction; // Claim the cell for the faction
-            cell.owner = owner; // Set the owner of the cell
-            return true;
-        }
-        return false; // Cell already claimed or invalid
+    // Game loop
+    function gameLoop() {
+        factions.forEach(faction => {
+            // Example move: claim a random unclaimed cell
+            const unclaimedCells = grid.filter(cell => !cell.faction);
+            if (unclaimedCells.length > 0) {
+                const randomCell = unclaimedCells[Math.floor(Math.random() * unclaimedCells.length)];
+                claimCell(grid, randomCell.q, randomCell.r, faction, `Player${faction}`);
+            }
+        });
+        drawGrid();
     }
 
     initialSetup();
     drawGrid();
+
+    // Start the game loop
+    setInterval(gameLoop, 1000);
 })();
