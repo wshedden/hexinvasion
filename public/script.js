@@ -1,3 +1,5 @@
+import Cell from '../src/game/cell.js'; // Import the Cell class
+
 (async function () {
     console.log('HexInvasion frontend loaded');
 
@@ -19,7 +21,7 @@
     for (let q = -GRID_SIZE; q <= GRID_SIZE; q++) {
         for (let r = -GRID_SIZE; r <= GRID_SIZE; r++) {
             if (Math.abs(q + r) <= GRID_SIZE) {
-                grid.push({ q, r, faction: null, owner: null, fertility: Math.floor(Math.random() * 11), population: 0 });
+                grid.push(new Cell(q, r)); // Use the Cell class
             }
         }
     }
@@ -140,9 +142,7 @@
     function claimCell(grid, q, r, faction, owner) {
         const cell = grid.find(cell => cell.q === q && cell.r === r);
         if (cell && !cell.faction) {
-            cell.faction = faction; // Claim the cell for the faction
-            cell.owner = owner; // Set the owner of the cell
-            cell.population = 1; // Initialize population
+            cell.claim(faction, owner); // Use the claim method from the Cell class
             showFactionInfoPanel(); // Update the faction info panel
             return true;
         }
