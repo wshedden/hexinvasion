@@ -96,6 +96,24 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             ctx.textBaseline = 'middle';
             ctx.fillText(cell.soldiers, x, y);
         }
+
+        // Draw creatures based on population
+        drawCreatures(x, y, size, cell.population);
+    }
+
+    // Draw creatures within a hex
+    function drawCreatures(x, y, size, population) {
+        const creatureSize = 5; // Size of each creature
+        const maxCreatures = Math.min(population, 6); // Limit the number of creatures to 6
+        for (let i = 0; i < maxCreatures; i++) {
+            const angle = (Math.PI / 180) * (60 * i);
+            const cx = x + (size / 2) * Math.cos(angle);
+            const cy = y + (size / 2) * Math.sin(angle);
+            ctx.beginPath();
+            ctx.arc(cx, cy, creatureSize, 0, 2 * Math.PI);
+            ctx.fillStyle = '#000'; // Creature color
+            ctx.fill();
+        }
     }
 
     // Show faction info panel
