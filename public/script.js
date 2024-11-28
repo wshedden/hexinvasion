@@ -67,14 +67,18 @@
     }
 
     // Show info panel
-    function showInfoPanel(cell) {
+    function showInfoPanel() {
         const infoPanel = document.getElementById('info-panel');
-        infoPanel.innerHTML = `
-            <h2>Cell Information</h2>
-            <p><strong>Coordinates:</strong> (${cell.q}, ${cell.r})</p>
-            <p><strong>Faction:</strong> ${cell.faction || 'Unclaimed'}</p>
-            <p><strong>Owner:</strong> ${cell.owner || 'None'}</p>
-        `;
+        let infoHTML = '<h2>Faction Information</h2>';
+        factions.forEach(faction => {
+            infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3><ul>`;
+            const factionCells = grid.filter(cell => cell.faction === faction);
+            factionCells.forEach(cell => {
+                infoHTML += `<li>Cell (${cell.q}, ${cell.r}) - Owner: ${cell.owner}</li>`;
+            });
+            infoHTML += '</ul>';
+        });
+        infoPanel.innerHTML = infoHTML;
         infoPanel.style.display = 'block';
     }
 
@@ -84,9 +88,35 @@
         if (cell && !cell.faction) {
             cell.faction = faction; // Claim the cell for the faction
             cell.owner = owner; // Set the owner of the cell
+            showInfoPanel(); // Update the info panel
             return true;
         }
         return false; // Cell already claimed or invalid
+    }
+
+    // Find neighboring cells
+    function getNeighbors(q, r) {
+        const directions = [
+            { dq: 1, dr: 0 }, { dq: 1, dr: -1 }, { dq: 0, dr: -1 },
+            { dq: -1, dr: 0 }, { dq: -1, dr: 1 }, { dq: 0, dr: 1 }
+        ];
+        return directions.map(dir => {
+            return grid.find(cell => cell.q === q + dir.dq && cell.r === r + dir.dr);
+        }).filter(cell => cell !== undefined);
+    }
+
+    // Find all cells a faction neighbors
+    function getFactionNeighbors(faction) {
+        const factionCells = grid.filter(cell => cell.faction === faction);
+        const neighbors = new Set();
+        factionCells.forEach(cell => {
+            getNeighbors(cell.q, cell.r).forEach(neighbor => {
+                if (!neighbor.faction) {
+                    neighbors.add(neighbor);
+                }
+            });
+        });
+        return Array.from(neighbors);
     }
 
     // Handle clicks
@@ -116,10 +146,10 @@
     // Game loop
     function gameLoop() {
         factions.forEach(faction => {
-            // Example move: claim a random unclaimed cell
-            const unclaimedCells = grid.filter(cell => !cell.faction);
-            if (unclaimedCells.length > 0) {
-                const randomCell = unclaimedCells[Math.floor(Math.random() * unclaimedCells.length)];
+            // Claim a random neighboring cell
+            const neighboringCells = getFactionNeighbors(faction);
+            if (neighboringCells.length > 0) {
+                const randomCell = neighboringCells[Math.floor(Math.random() * neighboringCells.length)];
                 claimCell(grid, randomCell.q, randomCell.r, faction, `Player${faction}`);
             }
         });
@@ -128,6 +158,7 @@
 
     initialSetup();
     drawGrid();
+    showInfoPanel(); // Initial call to show info panel
 
     // Start the game loop
     setInterval(gameLoop, 1000);
