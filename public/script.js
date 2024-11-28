@@ -129,6 +129,16 @@
         return Array.from(neighbors);
     }
 
+    // Decide the best move for a faction
+    function decideBestMove(faction) {
+        const neighboringCells = getFactionNeighbors(faction);
+        if (neighboringCells.length > 0) {
+            // Pick the cell with the highest fertility
+            const bestCell = neighboringCells.reduce((maxCell, cell) => cell.fertility > maxCell.fertility ? cell : maxCell, neighboringCells[0]);
+            claimCell(grid, bestCell.q, bestCell.r, faction, `Player${faction}`);
+        }
+    }
+
     // Handle clicks
     canvas.addEventListener('click', e => {
         const x = e.offsetX;
@@ -156,12 +166,7 @@
     // Game loop
     function gameLoop() {
         factions.forEach(faction => {
-            // Claim a random neighboring cell
-            const neighboringCells = getFactionNeighbors(faction);
-            if (neighboringCells.length > 0) {
-                const randomCell = neighboringCells[Math.floor(Math.random() * neighboringCells.length)];
-                claimCell(grid, randomCell.q, randomCell.r, faction, `Player${faction}`);
-            }
+            decideBestMove(faction);
         });
         drawGrid();
     }
