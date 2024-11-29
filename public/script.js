@@ -7,6 +7,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     const factions = ['red', 'blue'];
     let activeFaction = factions[0];
     let activeOwner = 'Player1'; // Example owner
+    let hoveredCell = null; // State to keep track of the hovered cell
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -56,6 +57,15 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             const { x, y } = hexToPixel(cell.q, cell.r);
             drawHex(x, y, hexSize, cell);
         });
+
+        // Highlight neighboring tiles if a cell is hovered
+        if (hoveredCell) {
+            const neighbors = getNeighbors(hoveredCell.q, hoveredCell.r);
+            neighbors.forEach(neighbor => {
+                const { x, y } = hexToPixel(neighbor.q, neighbor.r);
+                drawHex(x, y, hexSize, neighbor, true); // Pass true to indicate highlighting
+            });
+        }
     }
 
     // Get border color based on neighboring factions
@@ -72,7 +82,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     }
 
     // Draw a single hex
-    function drawHex(x, y, size, cell) {
+    function drawHex(x, y, size, cell, highlight = false) {
         const angle = (Math.PI / 180) * 60;
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
@@ -82,7 +92,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        ctx.fillStyle = cell.getColor();
+        ctx.fillStyle = highlight ? 'yellow' : cell.getColor(); // Highlight color
         ctx.strokeStyle = cell.faction ? '#000' : getBorderColor(cell); // Outline color based on faction or border
         ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
@@ -208,6 +218,20 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             }
         });
     }
+
+    // Handle mouse move to detect hovered cell
+    canvas.addEventListener('mousemove', e => {
+        const x = e.offsetX;
+        const y = e.offsetY;
+
+        // Find hovered cell
+        hoveredCell = grid.find(cell => {
+            const { x: cellX, y: cellY } = hexToPixel(cell.q, cell.r);
+            return Math.hypot(x - cellX, y - cellY) < hexSize;
+        });
+
+        drawGrid(); // Redraw the grid to show highlighting
+    });
 
     // Handle clicks
     canvas.addEventListener('click', e => {
