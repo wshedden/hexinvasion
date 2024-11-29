@@ -5,7 +5,8 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
 
     const GRID_SIZE = 5; // Hardcoded for prototype
     const factions = ['red', 'blue'];
-    let activeFaction = factions[0];
+    let activeFactionIndex = 0; // Index to keep track of the current faction's turn
+    let activeFaction = factions[activeFactionIndex];
     let activeOwner = 'Player1'; // Example owner
     let hoveredCell = null; // State to keep track of the hovered cell
 
@@ -172,14 +173,8 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
 
     function getNeighbors(q, r) {
         const neighborsCoords = getAxialNeighbors(q, r);
-        // console.log(`Neighbors for (${q}, ${r}):`, neighborsCoords);
         return neighborsCoords.map(([neighborQ, neighborR]) => {
             const neighbor = grid.find(cell => cell.q === neighborQ && cell.r === neighborR);
-            if (neighbor) {
-                console.log(`Neighbor found: (${neighbor.q}, ${neighbor.r})`);
-            } else {
-                console.log(`No neighbor at: (${neighborQ}, ${neighborR})`);
-            }
             return neighbor;
         }).filter(cell => cell !== undefined);
     }
@@ -265,17 +260,16 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     // Toggle faction
     document.addEventListener('keydown', e => {
         if (e.key === ' ') {
-            activeFaction = factions[(factions.indexOf(activeFaction) + 1) % factions.length];
+            activeFactionIndex = (activeFactionIndex + 1) % factions.length;
+            activeFaction = factions[activeFactionIndex];
             console.log(`Active faction: ${activeFaction}`);
         }
     });
 
     // Game loop
     function gameLoop() {
-        factions.forEach(faction => {
-            decideBestMove(faction);
-            moveSoldiersToContestedTiles(faction);
-        });
+        decideBestMove(activeFaction);
+        moveSoldiersToContestedTiles(activeFaction);
 
         // Increase population of occupied cells
         grid.forEach(cell => {
@@ -288,12 +282,12 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         });
 
         drawGrid();
+
+        // Switch to the next faction
+        activeFactionIndex = (activeFactionIndex + 1) % factions.length;
+        activeFaction = factions[activeFactionIndex];
     }
 
     initialSetup();
-    drawGrid();
-    showFactionInfoPanel(); // Initial call to show faction info panel
-
-    // Start the game loop
-    setInterval(gameLoop, 1000);
+    setInterval(gameLoop, 1000); // Run the game loop every second
 })();

@@ -11,6 +11,7 @@ export default class Cell {
         this.neighbors = [];
         this.highlighted = false; // New property
         this.threatened = false; // New property
+        this.fertility = Math.floor(Math.random() * 11); // New property
     }
 
     claim(faction, owner) {
