@@ -6,7 +6,7 @@ export default class Creature {
     }
 
     moveTo(q, r) {
-        this.q = q;
+        this.q = q;                                                                                                                                                                                                                                                                                                                                                                                                              
         this.r = r;
     }
 }

@@ -8,7 +8,8 @@ export default class Cell {
         this.owner = null;
         this.population = 0;
         this.soldiers = 0;
-        this.neighbors = []; // New property to store neighbors
+        this.neighbors = [];
+        this.highlighted = false; // New property
     }
 
     claim(faction, owner) {

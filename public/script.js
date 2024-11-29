@@ -55,16 +55,8 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         grid.forEach(cell => {
             const { x, y } = hexToPixel(cell.q, cell.r);
-            drawHex(x, y, hexSize, cell);
+            drawHex(ctx, x, y, hexSize, cell);
         });
-
-        // Highlight neighboring tiles if a cell is hovered
-        if (hoveredCell) {
-            hoveredCell.neighbors.forEach(neighbor => {
-                const { x, y } = hexToPixel(neighbor.q, neighbor.r);
-                drawHex(x, y, hexSize, neighbor, true); // Pass true to indicate highlighting
-            });
-        }
     }
 
     // Get border color based on neighboring factions
@@ -81,7 +73,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     }
 
     // Draw a single hex
-    function drawHex(x, y, size, cell, highlight = false) {
+    function drawHex(ctx, x, y, size, cell) {
         const angle = (Math.PI / 180) * 60;
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
@@ -91,34 +83,11 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        ctx.fillStyle = highlight ? 'yellow' : cell.getColor(); // Highlight color
-        ctx.strokeStyle = cell.faction ? '#000' : getBorderColor(cell); // Outline color based on faction or border
+        ctx.fillStyle = cell.highlighted ? 'yellow' : cell.getColor(); // Highlight color
+        ctx.strokeStyle = cell.faction ? '#000' : '#AAA'; // Outline color
         ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
         ctx.stroke();
-
-        // Draw number of soldiers
-        if (cell.soldiers > 0) {
-            ctx.fillStyle = '#000';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(cell.soldiers, x, y);
-        }
-
-        // Draw cute face for claimed cells
-        if (cell.faction) {
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            // Draw eyes
-            ctx.arc(x - size / 4, y - size / 4, size / 10, 0, 2 * Math.PI);
-            ctx.arc(x + size / 4, y - size / 4, size / 10, 0, 2 * Math.PI);
-            ctx.fill();
-            // Draw mouth
-            ctx.beginPath();
-            ctx.arc(x, y + size / 8, size / 6, 0, Math.PI);
-            ctx.stroke();
-        }
     }
 
     // Draw creatures within a hex
@@ -252,10 +221,18 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         const y = e.offsetY;
 
         // Find hovered cell
-        hoveredCell = grid.find(cell => {
+        const hoveredCell = grid.find(cell => {
             const { x: cellX, y: cellY } = hexToPixel(cell.q, cell.r);
             return Math.hypot(x - cellX, y - cellY) < hexSize;
         });
+
+        // Reset highlight status for all cells
+        grid.forEach(cell => cell.highlighted = false);
+
+        if (hoveredCell) {
+            hoveredCell.highlighted = true;
+            hoveredCell.neighbors.forEach(neighbor => neighbor.highlighted = true);
+        }
 
         drawGrid(); // Redraw the grid to show highlighting
     });
