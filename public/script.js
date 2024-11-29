@@ -60,8 +60,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
 
         // Highlight neighboring tiles if a cell is hovered
         if (hoveredCell) {
-            const neighbors = getNeighbors(hoveredCell.q, hoveredCell.r);
-            neighbors.forEach(neighbor => {
+            hoveredCell.neighbors.forEach(neighbor => {
                 const { x, y } = hexToPixel(neighbor.q, neighbor.r);
                 drawHex(x, y, hexSize, neighbor, true); // Pass true to indicate highlighting
             });
@@ -169,13 +168,27 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     }
 
     // Find neighboring cells
-    function getNeighbors(q, r) {
+    function getAxialNeighbors(q, r) {
         const directions = [
-            { dq: 1, dr: 0 }, { dq: 1, dr: -1 }, { dq: 0, dr: -1 },
-            { dq: -1, dr: 0 }, { dq: -1, dr: 1 }, { dq: 0, dr: 1 }
+            [1, 0], [-1, 0],
+            [0, 1], [0, -1],
+            [1, -1], [-1, 1]
         ];
-        return directions.map(dir => {
-            return grid.find(cell => cell.q === q + dir.dq && cell.r === r + dir.dr);
+
+        return directions.map(([dq, dr]) => [q + dq, r + dr]);
+    }
+
+    function getNeighbors(q, r) {
+        const neighborsCoords = getAxialNeighbors(q, r);
+        // console.log(`Neighbors for (${q}, ${r}):`, neighborsCoords);
+        return neighborsCoords.map(([neighborQ, neighborR]) => {
+            const neighbor = grid.find(cell => cell.q === neighborQ && cell.r === neighborR);
+            if (neighbor) {
+                console.log(`Neighbor found: (${neighbor.q}, ${neighbor.r})`);
+            } else {
+                console.log(`No neighbor at: (${neighborQ}, ${neighborR})`);
+            }
+            return neighbor;
         }).filter(cell => cell !== undefined);
     }
 

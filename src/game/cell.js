@@ -8,7 +8,7 @@ export default class Cell {
         this.owner = null;
         this.population = 0;
         this.soldiers = 0;
-        this.army = false; // New property to indicate if the cell contains an army
+        this.neighbors = []; // New property to store neighbors
     }
 
     claim(faction, owner) {
@@ -24,6 +24,10 @@ export default class Cell {
         this.soldiers = Math.max(0, this.soldiers - count);
     }
 
+    addNeighbor(neighbor) {
+        this.neighbors.push(neighbor);
+    }
+
     getColor() {
         const colorMap = {
             red: '#8B0000',
@@ -32,7 +36,7 @@ export default class Cell {
         return this.faction ? colorMap[this.faction] || '#CCCCCC' : '#FFFFFF';
     }
 
-    calculateThreatened(neighbors) {
+    calculateThreatened() {
         // Calculate threatened value based on neighbors
     }
 }

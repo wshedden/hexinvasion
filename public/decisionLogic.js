@@ -2,12 +2,38 @@ import { QclaimCell } from './factionLogic';
 
 // Generate hex grid
 const grid = [];
+const gridMap = new Map(); // Map to store cells by their coordinates
+
 for (let q = -GRID_SIZE; q <= GRID_SIZE; q++) {
     for (let r = -GRID_SIZE; r <= GRID_SIZE; r++) {
         if (Math.abs(q + r) <= GRID_SIZE) {
-            grid.push({ q, r, faction: null, owner: null, fertility: Math.floor(Math.random() * 11), population: 0, wealth: 100, soldiers: 0 });
+            const cell = new Cell(q, r);
+            grid.push(cell);
+            gridMap.set(`${q},${r}`, cell); // Store cell in the map
         }
     }
+}
+
+// Set neighbors for each cell
+grid.forEach(cell => {
+    const neighborsCoords = getAxialNeighbors(cell.q, cell.r);
+    neighborsCoords.forEach(([neighborQ, neighborR]) => {
+        const neighbor = gridMap.get(`${neighborQ},${neighborR}`);
+        if (neighbor) {
+            cell.addNeighbor(neighbor);
+        }
+    });
+});
+
+// Find neighboring cells
+function getAxialNeighbors(q, r) {
+    const directions = [
+        [1, 0], [-1, 0],
+        [0, 1], [0, -1],
+        [1, -1], [-1, 1]
+    ];
+
+    return directions.map(([dq, dr]) => [q + dq, r + dr]);
 }
 
 // Claim a cell for a faction and owner
