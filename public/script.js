@@ -4,7 +4,10 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     console.log('HexInvasion frontend loaded');
 
     const GRID_SIZE = 5; // Hardcoded for prototype
-    const factions = ['red', 'blue'];
+    const factions = [
+        { name: 'red', army: 100 },
+        { name: 'blue', army: 100 }
+    ];
     let activeFactionIndex = 0; // Index to keep track of the current faction's turn
     let activeFaction = factions[activeFactionIndex];
     let activeOwner = 'Player1'; // Example owner
@@ -60,19 +63,6 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         });
     }
 
-    // Get border color based on neighboring factions
-    function getBorderColor(cell) {
-        const neighbors = getNeighbors(cell.q, cell.r);
-        const neighborFactions = new Set(neighbors.map(neighbor => neighbor.faction).filter(faction => faction));
-        if (neighborFactions.size === 1) {
-            return Array.from(neighborFactions)[0];
-        } else if (neighborFactions.size > 1) {
-            // Mix colors if bordered by multiple factions
-            return 'purple'; // Example mixed color
-        }
-        return '#AAA'; // Default border color
-    }
-
     // Draw a single hex
     function drawHex(ctx, x, y, size, cell) {
         const angle = (Math.PI / 180) * 60;
@@ -84,7 +74,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        ctx.fillStyle = cell.highlighted ? 'yellow' : cell.getColor(); // Highlight color
+        ctx.fillStyle = cell.highlighted ? 'yellow' : cell.neighborHighlighted ? 'lightyellow' : cell.getColor(); // Highlight color
         ctx.strokeStyle = cell.faction ? '#000' : '#AAA'; // Outline color
         ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
@@ -100,33 +90,19 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         }
     }
 
-    // Draw creatures within a hex
-    function drawCreatures(x, y, size, population) {
-        const creatureSize = 5; // Size of each creature
-        const maxCreatures = Math.min(population, 6); // Limit the number of creatures to 6
-        for (let i = 0; i < maxCreatures; i++) {
-            const angle = (Math.PI / 180) * (60 * i);
-            const cx = x + (size / 2) * Math.cos(angle);
-            const cy = y + (size / 2) * Math.sin(angle);
-            ctx.beginPath();
-            ctx.arc(cx, cy, creatureSize, 0, 2 * Math.PI);
-            ctx.fillStyle = '#000'; // Creature color
-            ctx.fill();
-        }
-    }
-
     // Show faction info panel
     function showFactionInfoPanel() {
         const infoPanel = document.getElementById('faction-info-panel');
         let infoHTML = '<h2>Faction Information</h2>';
         factions.forEach(faction => {
-            const factionCells = grid.filter(cell => cell.faction === faction);
+            const factionCells = grid.filter(cell => cell.faction === faction.name);
             const totalPopulation = factionCells.reduce((sum, cell) => sum + cell.population, 0);
             const totalSoldiers = factionCells.reduce((sum, cell) => sum + cell.soldiers, 0);
-            infoHTML += `<h3>${faction.charAt(0).toUpperCase() + faction.slice(1)} Faction</h3>`;
+            infoHTML += `<h3>${faction.name.charAt(0).toUpperCase() + faction.name.slice(1)} Faction</h3>`;
             infoHTML += `<p>Cells Claimed: ${factionCells.length}</p>`;
             infoHTML += `<p>Total Population: ${totalPopulation}</p>`;
             infoHTML += `<p>Total Soldiers: ${totalSoldiers}</p>`;
+            infoHTML += `<p>Army: ${faction.army}</p>`;
         });
         infoPanel.innerHTML = infoHTML;
         infoPanel.style.display = 'block';
@@ -181,7 +157,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
 
     // Find all cells a faction neighbors
     function getFactionNeighbors(faction) {
-        const factionCells = grid.filter(cell => cell.faction === faction);
+        const factionCells = grid.filter(cell => cell.faction === faction.name);
         const neighbors = new Set();
         factionCells.forEach(cell => {
             getNeighbors(cell.q, cell.r).forEach(neighbor => {
@@ -199,19 +175,30 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         if (neighboringCells.length > 0) {
             // Pick the cell with the highest fertility
             const bestCell = neighboringCells.reduce((maxCell, cell) => cell.fertility > maxCell.fertility ? cell : maxCell, neighboringCells[0]);
-            claimCell(grid, bestCell.q, bestCell.r, faction, `Player${faction}`);
+            claimCell(grid, bestCell.q, bestCell.r, faction.name, `Player${faction.name}`);
         }
+    }
+
+    // Allocate armies to cells
+    function allocateArmies(faction) {
+        const factionCells = grid.filter(cell => cell.faction === faction.name);
+        const armyPerCell = Math.floor(faction.army / factionCells.length);
+        factionCells.forEach(cell => {
+            cell.soldiers += armyPerCell;
+            faction.army -= armyPerCell;
+        });
     }
 
     // Move soldiers to contested tiles
     function moveSoldiersToContestedTiles(faction) {
-        const factionCells = grid.filter(cell => cell.faction === faction);
+        const factionCells = grid.filter(cell => cell.faction === faction.name);
         factionCells.forEach(cell => {
             const neighbors = getNeighbors(cell.q, cell.r);
-            const contestedNeighbors = neighbors.filter(neighbor => neighbor.faction && neighbor.faction !== faction);
+            const contestedNeighbors = neighbors.filter(neighbor => neighbor.faction && neighbor.faction !== faction.name);
             if (contestedNeighbors.length > 0) {
                 const targetCell = contestedNeighbors[0]; // Move soldiers to the first contested neighbor
                 if (cell.soldiers > 0) {
+                    faction.army += cell.soldiers; // Add soldiers back to the faction's army
                     targetCell.soldiers += cell.soldiers;
                     cell.soldiers = 0;
                 }
@@ -231,11 +218,15 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         });
 
         // Reset highlight status for all cells
-        grid.forEach(cell => cell.highlighted = false);
+        grid.forEach(cell => {
+            cell.highlighted = false;
+            cell.neighborHighlighted = false;
+        });
 
         if (hoveredCell) {
             hoveredCell.highlighted = true;
-            hoveredCell.neighbors.forEach(neighbor => neighbor.highlighted = true);
+            const neighbors = getNeighbors(hoveredCell.q, hoveredCell.r);
+            neighbors.forEach(neighbor => neighbor.neighborHighlighted = true);
         }
 
         drawGrid(); // Redraw the grid to show highlighting
@@ -262,13 +253,14 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         if (e.key === ' ') {
             activeFactionIndex = (activeFactionIndex + 1) % factions.length;
             activeFaction = factions[activeFactionIndex];
-            console.log(`Active faction: ${activeFaction}`);
+            console.log(`Active faction: ${activeFaction.name}`);
         }
     });
 
     // Game loop
     function gameLoop() {
         decideBestMove(activeFaction);
+        allocateArmies(activeFaction);
         moveSoldiersToContestedTiles(activeFaction);
 
         // Increase population of occupied cells
