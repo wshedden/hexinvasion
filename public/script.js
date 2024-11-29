@@ -82,7 +82,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        ctx.fillStyle = cell.faction ? factions.includes(cell.faction) ? cell.faction : '#CCC' : '#FFF';
+        ctx.fillStyle = cell.getColor();
         ctx.strokeStyle = cell.faction ? '#000' : getBorderColor(cell); // Outline color based on faction or border
         ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
@@ -96,9 +96,6 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             ctx.textBaseline = 'middle';
             ctx.fillText(cell.soldiers, x, y);
         }
-
-        // Draw creatures based on population
-        drawCreatures(x, y, size, cell.population);
     }
 
     // Draw creatures within a hex
