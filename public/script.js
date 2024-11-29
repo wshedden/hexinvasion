@@ -105,6 +105,20 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             ctx.textBaseline = 'middle';
             ctx.fillText(cell.soldiers, x, y);
         }
+
+        // Draw cute face for claimed cells
+        if (cell.faction) {
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            // Draw eyes
+            ctx.arc(x - size / 4, y - size / 4, size / 10, 0, 2 * Math.PI);
+            ctx.arc(x + size / 4, y - size / 4, size / 10, 0, 2 * Math.PI);
+            ctx.fill();
+            // Draw mouth
+            ctx.beginPath();
+            ctx.arc(x, y + size / 8, size / 6, 0, Math.PI);
+            ctx.stroke();
+        }
     }
 
     // Draw creatures within a hex
