@@ -10,6 +10,7 @@ export default class Cell {
         this.soldiers = 0;
         this.neighbors = [];
         this.highlighted = false; // New property
+        this.threatened = false; // New property
     }
 
     claim(faction, owner) {
@@ -37,7 +38,7 @@ export default class Cell {
         return this.faction ? colorMap[this.faction] || '#CCCCCC' : '#FFFFFF';
     }
 
-    calculateThreatened() {
-        // Calculate threatened value based on neighbors
+    calculateThreatened(neighbors) {
+        this.threatened = neighbors.some(neighbor => neighbor.faction && neighbor.faction !== this.faction);
     }
 }
