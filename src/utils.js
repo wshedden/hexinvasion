@@ -54,3 +54,13 @@ function drawCreature(ctx, x, y) {
     ctx.fill();
     ctx.stroke();
 }
+
+export function getNeighbors(q, r, grid) {
+    const directions = [
+        { dq: 1, dr: 0 }, { dq: 1, dr: -1 }, { dq: 0, dr: -1 },
+        { dq: -1, dr: 0 }, { dq: -1, dr: 1 }, { dq: 0, dr: 1 }
+    ];
+    return directions.map(dir => {
+        return grid.find(cell => cell.q === q + dir.dq && cell.r === r + dir.dr);
+    }).filter(cell => cell !== undefined);
+}
