@@ -2,11 +2,12 @@ import { drawGrid } from './utils';
 import { decideBestMove } from '../utils/decisionLogic';
 import { moveSoldiersToContestedTiles } from '../utils/factionLogic';
 
-export function gameLoop(grid, factions) {
-    factions.forEach(faction => {
-        decideBestMove(grid, faction);
-        moveSoldiersToContestedTiles(grid, faction);
-    });
+let currentFactionIndex = 0;
+
+function processFactionTurn(grid, factions) {
+    const faction = factions[currentFactionIndex];
+    decideBestMove(grid, faction);
+    moveSoldiersToContestedTiles(grid, faction);
 
     // Increase population of occupied cells
     grid.forEach(cell => {
@@ -17,4 +18,15 @@ export function gameLoop(grid, factions) {
     });
 
     drawGrid(grid);
+
+    // Move to the next faction
+    currentFactionIndex = (currentFactionIndex + 1) % factions.length;
+
+    // Schedule the next faction's turn
+    setTimeout(() => processFactionTurn(grid, factions), 500);
+}
+
+export function gameLoop(grid, factions) {
+    // Start the first faction's turn
+    processFactionTurn(grid, factions);
 }
