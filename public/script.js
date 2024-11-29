@@ -88,6 +88,15 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         ctx.lineWidth = cell.faction ? 2 : 1; // Thicker outline for claimed cells
         ctx.fill();
         ctx.stroke();
+
+        // Draw a symbol if the cell is threatened
+        if (cell.threatened) {
+            ctx.fillStyle = 'red'; // Symbol color
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('!', x, y);
+        }
     }
 
     // Draw creatures within a hex
