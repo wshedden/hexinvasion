@@ -28,9 +28,7 @@ grid.forEach(cell => {
 // Find neighboring cells
 function getAxialNeighbors(q, r) {
     const directions = [
-        [1, 0], [-1, 0],
-        [0, 1], [0, -1],
-        [1, -1], [-1, 1]
+        [1, 0],
     ];
 
     return directions.map(([dq, dr]) => [q + dq, r + dr]);

@@ -31,6 +31,10 @@ export default class Cell {
         this.neighbors.push(neighbor);
     }
 
+    getNeighbors() {
+        return this.neighbors;
+    }
+
     getColor() {
         const colorMap = {
             red: '#8B0000',
