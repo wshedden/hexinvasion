@@ -132,7 +132,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
             cell.claim(faction, owner); // Use the claim method from the Cell class
             showFactionInfoPanel(); // Update the faction info panel
             return true;
-        }
+        }getAxial
         return false; // Cell already claimed or invalid
     }
 
@@ -141,7 +141,7 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
         const directions = [
             [1, 0], [-1, 0],
             [0, 1], [0, -1],
-            [1, -1], [-1, 1]
+            [1, -1], [-1, -1]
         ];
 
         return directions.map(([dq, dr]) => [q + dq, r + dr]);
@@ -150,9 +150,22 @@ import Cell from '../src/game/cell.js'; // Import the Cell class
     function getNeighbors(q, r) {
         const neighborsCoords = getAxialNeighbors(q, r);
         return neighborsCoords.map(([neighborQ, neighborR]) => {
-            const neighbor = grid.find(cell => cell.q === neighborQ && cell.r === neighborR);
-            return neighbor;
+            return grid.find(cell => cell.q === neighborQ && cell.r === neighborR);
         }).filter(cell => cell !== undefined);
+    }
+
+    // Highlight neighbors
+    function highlightNeighbors(cell) {
+        const neighbors = getNeighbors(cell.q, cell.r);
+        neighbors.forEach(neighbor => {
+            neighbor.highlighted = true;
+        });
+    }
+
+    // Calculate threatened status
+    function calculateThreatened(cell) {
+        const neighbors = getNeighbors(cell.q, cell.r);
+        cell.threatened = neighbors.some(neighbor => neighbor.faction && neighbor.faction !== cell.faction);
     }
 
     // Find all cells a faction neighbors
