@@ -5,8 +5,6 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "jest",
     "live": "live-server public"
   },
   "author": "Your Name",
@@ -15,8 +13,6 @@
     "express": "^4.18.2"
   },
   "devDependencies": {
-    "jest": "^29.6.1",
-    "live-server": "^1.2.2",
-    "nodemon": "^3.0.0"
+    "live-server": "^1.2.2"
   }
 }
